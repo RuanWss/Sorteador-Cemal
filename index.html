@@ -37,8 +37,16 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        color: #666;
-        font-size: 14px;
+        color: #ef4444; /* red-500 */
+        font-family: 'Inter', sans-serif;
+        font-size: 16px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
       }
     </style>
     <script>
@@ -52,8 +60,8 @@
     "react": "https://esm.sh/react@18.3.1",
     "react-dom": "https://esm.sh/react-dom@18.3.1",
     "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "react/": "https://esm.sh/react@^19.2.1/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.1/"
+    "react-dom/": "https://esm.sh/react-dom@^19.2.1/",
+    "react/": "https://esm.sh/react@^19.2.1/"
   }
 }
 </script>
