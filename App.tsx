@@ -189,13 +189,13 @@ export default function App() {
             <div className="flex bg-black/40 p-1 rounded-xl mb-6 border border-white/5">
               <button 
                 onClick={() => { setMode('names'); setWinners([]); setShowConfetti(false); }}
-                className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${mode === 'names' ? 'bg-red-800 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${mode === 'names' ? 'bg-red-900 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
               >
                 <UsersIcon /> Nomes
               </button>
               <button 
                 onClick={() => { setMode('numbers'); setWinners([]); setShowConfetti(false); }}
-                className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${mode === 'numbers' ? 'bg-red-800 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+                className={`flex-1 py-2 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all ${mode === 'numbers' ? 'bg-red-900 text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
               >
                 <HashIcon /> Números
               </button>
