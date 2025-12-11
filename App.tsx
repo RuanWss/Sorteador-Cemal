@@ -16,14 +16,23 @@ const PlayIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
 );
 
+const PlusIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+);
+
+const MinusIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/></svg>
+);
+
 export default function App() {
   const [namesText, setNamesText] = useState('');
   const [namesList, setNamesList] = useState<string[]>([]);
-  const [winner, setWinner] = useState<string | null>(null);
+  const [winners, setWinners] = useState<string[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [loadingAI, setLoadingAI] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [rollingName, setRollingName] = useState(''); // For the animation effect
+  const [quantity, setQuantity] = useState(1);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -36,10 +45,28 @@ export default function App() {
     setNamesList(list);
   };
 
+  // Adjust quantity if list size changes to be smaller than quantity
+  useEffect(() => {
+    if (namesList.length > 0 && quantity > namesList.length) {
+      setQuantity(namesList.length);
+    } else if (namesList.length > 0 && quantity === 0) {
+      setQuantity(1);
+    }
+  }, [namesList.length]);
+
+  const incrementQuantity = () => {
+    if (quantity < namesList.length) setQuantity(q => q + 1);
+  };
+
+  const decrementQuantity = () => {
+    if (quantity > 1) setQuantity(q => q - 1);
+  };
+
   const clearAll = () => {
     setNamesText('');
     setNamesList([]);
-    setWinner(null);
+    setWinners([]);
+    setQuantity(1);
     setShowConfetti(false);
   };
 
@@ -62,7 +89,7 @@ export default function App() {
     if (namesList.length === 0) return;
     
     setIsDrawing(true);
-    setWinner(null);
+    setWinners([]);
     setShowConfetti(false);
 
     let counter = 0;
@@ -81,8 +108,11 @@ export default function App() {
   };
 
   const finishDraw = () => {
-    const finalWinner = namesList[Math.floor(Math.random() * namesList.length)];
-    setWinner(finalWinner);
+    // Shuffle and pick 'quantity' winners
+    const shuffled = [...namesList].sort(() => 0.5 - Math.random());
+    const selectedWinners = shuffled.slice(0, quantity);
+    
+    setWinners(selectedWinners);
     setIsDrawing(false);
     setShowConfetti(true);
   };
@@ -151,11 +181,11 @@ export default function App() {
           <div className="flex flex-col gap-6">
             
             {/* Draw Area */}
-            <div className="glass p-6 rounded-2xl shadow-2xl flex flex-col items-center justify-center text-center min-h-[300px] border-t border-red-800/30 relative overflow-hidden">
+            <div className="glass p-6 rounded-2xl shadow-2xl flex flex-col items-center justify-center text-center min-h-[300px] border-t border-red-800/30 relative overflow-hidden transition-all duration-500">
                {/* Shine effect */}
                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
 
-               {!winner && !isDrawing && (
+               {winners.length === 0 && !isDrawing && (
                   <div className="text-gray-400 flex flex-col items-center gap-4 animate-pulse">
                     <div className="w-20 h-20 rounded-full bg-red-900/20 flex items-center justify-center border border-red-900/40">
                       <span className="text-4xl">?</span>
@@ -173,40 +203,79 @@ export default function App() {
                  </div>
                )}
 
-               {winner && !isDrawing && (
-                 <div className="flex flex-col items-center animate-[bounce_1s_infinite]">
-                    <div className="text-sm font-bold text-red-500 tracking-[0.2em] uppercase mb-2">Vencedor(a)</div>
-                    <div className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-300 drop-shadow-[0_5px_5px_rgba(255,0,0,0.5)]">
-                      {winner}
+               {winners.length > 0 && !isDrawing && (
+                 <div className="w-full h-full flex flex-col items-center max-h-[350px] overflow-y-auto">
+                    <div className="text-sm font-bold text-red-500 tracking-[0.2em] uppercase mb-4 sticky top-0 bg-black/0 backdrop-blur-sm w-full py-2 z-10">
+                      {winners.length > 1 ? 'Vencedores' : 'Vencedor(a)'}
                     </div>
-                    <div className="mt-6 text-sm text-gray-400">Parabéns!</div>
+                    
+                    {winners.length === 1 ? (
+                       <div className="flex flex-col items-center animate-[bounce_1s_infinite] my-auto">
+                          <div className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-300 drop-shadow-[0_5px_5px_rgba(255,0,0,0.5)]">
+                            {winners[0]}
+                          </div>
+                          <div className="mt-6 text-sm text-gray-400">Parabéns!</div>
+                       </div>
+                    ) : (
+                      <div className="flex flex-wrap justify-center gap-3 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {winners.map((winnerName, idx) => (
+                           <div key={idx} className="bg-gradient-to-br from-red-900/80 to-black border border-red-700/50 px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 min-w-[150px] justify-center transform hover:scale-105 transition-transform">
+                              <span className="text-red-400 font-bold text-lg">#{idx + 1}</span>
+                              <span className="text-xl font-bold text-white">{winnerName}</span>
+                           </div>
+                        ))}
+                      </div>
+                    )}
                  </div>
                )}
             </div>
 
-            {/* Action Button */}
-            <button
-              onClick={drawWinner}
-              disabled={namesList.length === 0 || isDrawing}
-              className={`
-                group relative w-full py-5 rounded-2xl font-bold text-xl uppercase tracking-widest transition-all duration-300
-                shadow-[0_0_20px_rgba(220,38,38,0.3)]
-                ${namesList.length === 0 || isDrawing 
-                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white transform hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(220,38,38,0.5)] active:translate-y-0'
-                }
-              `}
-            >
-              <span className="flex items-center justify-center gap-3">
-                {isDrawing ? 'Sorteando...' : (
-                  <>
-                    <PlayIcon /> Sortear Agora
-                  </>
-                )}
-              </span>
-            </button>
+            {/* Quantity Control & Action Button */}
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between glass px-4 py-3 rounded-xl border-t border-red-800/30">
+                  <span className="text-sm text-gray-300 font-medium">Quantidade de Ganhadores:</span>
+                  <div className="flex items-center gap-3 bg-black/40 rounded-lg p-1 border border-white/10">
+                    <button 
+                      onClick={decrementQuantity}
+                      disabled={isDrawing || quantity <= 1}
+                      className="w-8 h-8 flex items-center justify-center rounded bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:hover:bg-transparent transition-colors text-white"
+                    >
+                      <MinusIcon />
+                    </button>
+                    <span className="w-8 text-center font-bold text-lg">{quantity}</span>
+                    <button 
+                      onClick={incrementQuantity}
+                      disabled={isDrawing || quantity >= namesList.length}
+                      className="w-8 h-8 flex items-center justify-center rounded bg-red-600/20 hover:bg-red-600/40 text-red-200 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                    >
+                      <PlusIcon />
+                    </button>
+                  </div>
+                </div>
 
-            {/* Recent List Preview (Optional aesthetics) */}
+                <button
+                  onClick={drawWinner}
+                  disabled={namesList.length === 0 || isDrawing}
+                  className={`
+                    group relative w-full py-5 rounded-2xl font-bold text-xl uppercase tracking-widest transition-all duration-300
+                    shadow-[0_0_20px_rgba(220,38,38,0.3)]
+                    ${namesList.length === 0 || isDrawing 
+                      ? 'bg-gray-800 text-gray-500 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-red-700 to-red-600 hover:from-red-600 hover:to-red-500 text-white transform hover:-translate-y-1 hover:shadow-[0_10px_30px_rgba(220,38,38,0.5)] active:translate-y-0'
+                    }
+                  `}
+                >
+                  <span className="flex items-center justify-center gap-3">
+                    {isDrawing ? 'Sorteando...' : (
+                      <>
+                        <PlayIcon /> {quantity > 1 ? 'Sortear Ganhadores' : 'Sortear Agora'}
+                      </>
+                    )}
+                  </span>
+                </button>
+            </div>
+
+            {/* Recent List Preview */}
             <div className="glass rounded-xl p-4 flex flex-col gap-2 max-h-48 overflow-y-auto border border-white/5">
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Lista de Nomes ({namesList.length})</h3>
                 <div className="flex flex-wrap gap-2">
