@@ -166,14 +166,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-red-900 to-black text-white p-4 md:p-8 flex flex-col items-center relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-black via-red-800 to-black text-white p-4 md:p-8 flex flex-col items-center relative overflow-hidden font-sans">
       
       <Confetti active={showConfetti} />
 
       {/* Decorative Background */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-800/20 rounded-full blur-[100px]"></div>
-         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-800/20 rounded-full blur-[100px]"></div>
+         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[100px]"></div>
+         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[100px]"></div>
       </div>
 
       <div className="z-10 w-full max-w-4xl flex flex-col items-center">
