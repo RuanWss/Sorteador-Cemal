@@ -166,7 +166,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-red-800 to-black text-white p-4 md:p-8 flex flex-col items-center relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-black via-red-900 to-black text-white p-4 md:p-8 flex flex-col items-center relative overflow-hidden font-sans">
       
       <Confetti active={showConfetti} />
 
