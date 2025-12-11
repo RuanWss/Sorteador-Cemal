@@ -32,6 +32,10 @@ const HashIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
 );
 
+const UploadIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+);
+
 type Mode = 'names' | 'numbers';
 
 export default function App() {
@@ -40,6 +44,7 @@ export default function App() {
   // Names Mode State
   const [namesText, setNamesText] = useState('');
   const [namesList, setNamesList] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   
   // Numbers Mode State
   const [numMin, setNumMin] = useState<number>(1);
@@ -57,11 +62,48 @@ export default function App() {
 
   // --- Handlers ---
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const text = e.target.value;
+  const processNames = (text: string) => {
     setNamesText(text);
     const list = text.split(/[\n,]/).map(n => n.trim()).filter(n => n.length > 0);
     setNamesList(list);
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    processNames(e.target.value);
+  };
+
+  // Drag and Drop Handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        if (content) {
+          const newText = namesText ? `${namesText}\n${content}` : content;
+          processNames(newText);
+        }
+      };
+      
+      reader.readAsText(file);
+    }
   };
 
   // Ensure quantity is valid for the current pool
@@ -100,8 +142,9 @@ export default function App() {
       const generatedNames = await generateNamesWithAI("nomes variados para sorteio");
       const currentList = namesList;
       const newList = [...new Set([...currentList, ...generatedNames])]; 
+      const newText = newList.join('\n');
+      setNamesText(newText);
       setNamesList(newList);
-      setNamesText(newList.join('\n'));
     } catch (err) {
       alert("Não foi possível gerar nomes. Verifique sua chave de API.");
     } finally {
@@ -208,15 +251,29 @@ export default function App() {
                   Participantes
                 </h2>
                 
-                <div className="flex-grow mb-4 relative">
+                <div 
+                  className={`flex-grow mb-4 relative transition-all duration-300 rounded-xl ${isDragging ? 'ring-4 ring-red-500 scale-[1.02]' : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <textarea 
                     ref={textareaRef}
                     className="w-full h-64 md:h-80 bg-black/40 border border-red-900/50 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all resize-none"
-                    placeholder="Digite os nomes aqui, um por linha..."
+                    placeholder="Digite os nomes aqui, um por linha... ou arraste um arquivo de texto."
                     value={namesText}
                     onChange={handleTextChange}
                   ></textarea>
-                  <div className="absolute bottom-4 right-4 text-xs text-gray-400 bg-black/60 px-2 py-1 rounded-md">
+                  
+                  {/* Overlay for Drag State */}
+                  {isDragging && (
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-red-500 z-20 pointer-events-none">
+                      <UploadIcon />
+                      <span className="text-red-400 font-bold mt-2">Solte o arquivo aqui</span>
+                    </div>
+                  )}
+
+                  <div className="absolute bottom-4 right-4 text-xs text-gray-400 bg-black/60 px-2 py-1 rounded-md z-10 pointer-events-none">
                     {namesList.length} nomes
                   </div>
                 </div>
